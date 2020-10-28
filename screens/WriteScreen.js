@@ -14,12 +14,15 @@ export default class WriteScreen extends React.Component {
       }
 
       submitStory=async()=>{
-        db.collection("Stories").doc(this.state.Title).set({
+        db.collection("Stories").doc(this.state.Title).update({
             Title:this.state.Title,
             Story:this.state.Story,
             AuthorName:this.state.AuthorName
         })
-      ToastAndroid.show("Successfully Submitted",ToastAndroid.SHORT)}
+        return(
+      ToastAndroid.show("Successfully Submitted",ToastAndroid.SHORT))}
+
+
     render(){
         return(
             <View style={styles.container}>

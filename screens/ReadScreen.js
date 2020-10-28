@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, View ,FlatList} from 'react-native';
+import { Text, View ,FlatList, SearchBar} from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import db from '../config';
 
 export default class Readscreen extends React.Component {
@@ -7,7 +8,8 @@ export default class Readscreen extends React.Component {
     super();
     this.state={
       stories:[],
-      lastDocument:null
+      lastDocument:null,
+      search:""
     }
   }
 
@@ -33,17 +35,42 @@ export default class Readscreen extends React.Component {
       })
     })
   }
+
+  searchData = async()=>{
+    const searchStories = await db.collection("Stories").where("Title", "==", this.state.search).get()
+    
+    searchStories.docs.map((doc)=>{
+      this.setState({
+        stories:[doc.data()],
+        })
+    })
+  }
+  
+  updateSearch = (search) => {
+    this.setState({ search });
+  };
+
     render() {
+      const { search } = this.state;
       return (
         <View>
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text>Search</Text >
         </View>
+        <View>
+        <SearchBar
+        placeholder="Search..."
+        onChangeText={this.updateSearch}
+        value={search}
+      /></View>
         <FlatList data = {this.state.Alltransactions} 
         renderItem={({item})=>{
         <View style={{borderWidth:3}} >
               <Text>{"Title:" + item.Title}</Text>
               <Text>{"Author:" + item.AuthorName}</Text>
+              <TouchableOpacity>
+                <Text>Read</Text>
+              </TouchableOpacity>
         </View>
         }
       } 
