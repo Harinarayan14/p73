@@ -1,89 +1,126 @@
 import React from 'react';
-import { Text, View ,FlatList, SearchBar} from 'react-native';
+import { StyleSheet, Text, View ,FlatList,ScrollView} from 'react-native';
+import {SearchBar,Header} from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import db from '../config';
+import db from '../config'
 
-export default class Readscreen extends React.Component {
+export default class ReadScreen extends React.Component {
   constructor(){
     super();
-    this.state={
+    this.state ={
       stories:[],
-      lastDocument:null,
-      search:""
+      dataSource:[],
+      search : ''
     }
   }
-
-  componentDidMount= async()=>{
-    const Story = await db.collection("Stories").limit(10).get();
-    Story.docs.map((doc)=>{
-       this.setState({
-         stories:[...this.state.stories,doc.data()],
-         lastDocument:doc
-       })
-
-    })
-
+  componentDidMount(){
+    this.fetchStories()
   }
 
-  collectData = async()=>{
-    const Stories = await db.collection("Stories").startAfter(this.state.lastDocument)
-    .limit(10).get();
-    Stories.docs.map((doc)=>{
-      this.setState({
-        stories:[...this.state.stories,doc.data()],
-        lastDocument:doc
-      })
-    })
-  }
-
-  searchData = async()=>{
-    const searchStories = await db.collection("Stories").where("Title", "==", this.state.search).get()
-    
-    searchStories.docs.map((doc)=>{
-      this.setState({
-        stories:[doc.data()],
-        })
-    })
-  }
-  
-  updateSearch = (search) => {
-    this.setState({ search });
+  updateSearch = search => {
+    this.setState({ search: search });
   };
 
-    render() {
-      const { search } = this.state;
-      return (
-        <View>
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text>Search</Text >
-        </View>
-        <View>
-        <SearchBar
-        placeholder="Search..."
-        onChangeText={this.updateSearch}
-        value={search}
-      /></View>
-        <FlatList data = {this.state.Alltransactions} 
-        renderItem={({item})=>{
-        <View style={{borderWidth:3}} >
-              <Text>{"Title:" + item.Title}</Text>
-              <Text>{"Author:" + item.AuthorName}</Text>
-              <TouchableOpacity>
-                <Text>Read</Text>
-              </TouchableOpacity>
-        </View>
-        }
-      } 
-      keyExtractor={(item,index)=>{
-        index.toString();
-      }} 
-      onEndReached={this.collectData}
-      onEndReachedThreshold={0.8}
-      />
-          
-          
-        
-        </View>
-      );
+
+  fetchStories=()=>{
+    try {
+      var stories= [];
+     db.collection("Stories").get()
+      .then((snapshot)=> {
+          snapshot.forEach((doc)=> {           
+              stories.push(doc.data())
+          })
+          this.setState({stories: stories})
+        })
     }
-  }     
+    catch (error) {
+      console.log(error);
+    }
+  };
+
+
+  search(text) {
+    const newData = this.state.stories.filter((story)=> {
+
+      const storyData = story.Title ? story.Title.toUpperCase() 
+      : ''.toUpperCase();
+      const textData = text.toUpperCase();
+      return storyData.indexOf(textData) > -1;
+    });
+    this.setState({
+      dataSource: newData,
+      search: text,
+    });
+  }
+
+    render(){
+      return(
+        <View>
+           <Header
+              backgroundColor={'#DF3A01'}
+              centerComponent={{
+                text: 'Read Stories',
+                style: {
+                  color: '#FFFFFF',
+                  fontSize: 30,
+                  fontWeight: 'bold',
+                },
+              }}
+          />
+          <View styles ={{height:20,width:'100%'}}>
+              <SearchBar
+                  placeholder="Search"
+                  onChangeText={text => this.search(text)}
+                  onClear={text => this.search('')}
+                  value={this.state.search}
+            />
+          </View>
+          
+          <ScrollView>
+            {this.state.search==="" ? 
+            this.state.stories.map((story)=>{
+              return (
+                <View style={styles.storyContainer}>
+                  <Text style={{fontSize: 20,color:"blue"}}>  TITLE:  {story.Title}</Text>
+                  <Text style={{fontSize: 20,color:"blue"}}>  AUTHOR :  {story.AuthorName}</Text>
+                </View>
+              )
+            }):
+            this.state.dataSource.map((story)=>{
+              return (
+                <View style={styles.storyContainer}>
+                  <Text style={{fontSize: 20,color:"blue"}}>  TITLE:  {story.Title}</Text>
+                  <Text style={{fontSize: 20,color:"blue"}}>  AUTHOR :  {story.AuthorName}</Text>
+                </View>
+              )
+            })}
+            </ScrollView> 
+          
+          
+          
+        </View>  
+      );      
+    }
+}
+
+
+const styles = StyleSheet.create({
+  storyContainer: {
+    height: 120,
+    width:'100%',
+    borderWidth: 2,
+    backgroundColor: "yellow",
+    borderColor: 'green',
+    justifyContent:'center',
+    alignSelf: 'center',
+    color:"white"
+  },
+  readButton:{
+    backgroundColor:'green',
+    padding:10,
+    margin:10,
+    width:125,
+    height:50,
+    alignContent:"center"
+  }
+});
