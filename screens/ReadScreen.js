@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View ,FlatList,ScrollView} from 'react-native';
+import { StyleSheet, Text, View ,FlatList,ScrollView,Modal} from 'react-native';
 import {SearchBar,Header} from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import db from '../config'
@@ -10,7 +10,11 @@ export default class ReadScreen extends React.Component {
     this.state ={
       stories:[],
       dataSource:[],
-      search : ''
+      search : '',
+      isModalVisible:false,
+      title:"",
+      author:"",
+      story:""
     }
   }
   componentDidMount(){
@@ -20,7 +24,32 @@ export default class ReadScreen extends React.Component {
   updateSearch = search => {
     this.setState({ search: search });
   };
-
+  showStories=()=>{
+    <Modal 
+    animationType="fade"
+    transparent={true}
+    visible={this.state.isModalVisible}
+    >
+      <View>
+        <Text style={{
+          alignContent:"center",alignSelf:"center",fontSize:20,textDecorationStyle:"solid"
+          }}>{this.state.title}</Text>
+        <Text style={{
+          alignContent:"center",alignSelf:"flex-end",fontSize:15
+          }}>{"By "+this.state.author}</Text>
+        <Text style={{
+          alignContent:"center",alignSelf:"center",fontSize:12,fontFamily:"monospace"
+          }}>{this.state.story}</Text>
+      </View>
+      <TouchableOpacity style={styles.readButton}>
+        <Text style={{
+          alignContent:"center",alignSelf:"center",fontSize:15
+          }}
+          onPress={()=>this.setState({"isModalVisible":false})}
+          >Back</Text>
+      </TouchableOpacity>
+    </Modal>
+  }
 
   fetchStories=()=>{
     try {
@@ -83,6 +112,16 @@ export default class ReadScreen extends React.Component {
                 <View style={styles.storyContainer}>
                   <Text style={{fontSize: 20,color:"blue"}}>  TITLE:  {story.Title}</Text>
                   <Text style={{fontSize: 20,color:"blue"}}>  AUTHOR :  {story.AuthorName}</Text>
+                  <TouchableOpacity style={styles.readButton}
+                  onPress={
+                    this.setState({
+                      title:story.Title,
+                      author:story.AuthorName,
+                      story:story.Story
+                    })
+                  }> 
+                    <Text style={{fontSize: 20,color:"red"}}>Read</Text>
+                  </TouchableOpacity>
                 </View>
               )
             }):
@@ -91,6 +130,17 @@ export default class ReadScreen extends React.Component {
                 <View style={styles.storyContainer}>
                   <Text style={{fontSize: 20,color:"blue"}}>  TITLE:  {story.Title}</Text>
                   <Text style={{fontSize: 20,color:"blue"}}>  AUTHOR :  {story.AuthorName}</Text>
+                  <TouchableOpacity style={styles.readButton}
+                  onPress={
+                    this.setState({
+                      title:story.Title,
+                      author:story.AuthorName,
+                      story:story.Story
+                    })
+                  }> 
+                    <Text style={{fontSize: 20,color:"red"}}>Read</Text>
+                  </TouchableOpacity>
+
                 </View>
               )
             })}
