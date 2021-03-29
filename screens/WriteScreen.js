@@ -4,6 +4,10 @@ import { TextInput } from 'react-native-gesture-handler';
 import {Header} from 'react-native-elements'
 import db from '../config'
 import firebase from 'firebase'
+import {
+  SafeAreaView,
+  SafeAreaProvider
+} from 'react-native-safe-area-context';
 export default class WriteScreen extends React.Component {
     constructor(){
         super();
@@ -15,18 +19,20 @@ export default class WriteScreen extends React.Component {
       }
 
       submitStory=async()=>{
-        db.collection("Stories").doc(this.state.Title).update({
+        db.collection("Stories").doc(this.state.Title).set({
             Title:this.state.Title,
             Story:this.state.Story,
             AuthorName:this.state.AuthorName
         })
         return(
-      ToastAndroid.show("Successfully Submitted",ToastAndroid.SHORT))}
+      alert("Successfully Submitted"))}
 
 
     render(){
         return(
+          <SafeAreaProvider>
           <View>
+            <SafeAreaView />
             <Header
           backgroundColor={'#DF3A01'}
           centerComponent={{
@@ -85,7 +91,7 @@ export default class WriteScreen extends React.Component {
 
             </View>
             </View>
-            
+            </SafeAreaProvider>            
         )}
     
 }
