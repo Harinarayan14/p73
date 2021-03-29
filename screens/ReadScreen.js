@@ -3,7 +3,10 @@ import { StyleSheet, Text, View ,FlatList,ScrollView,Modal} from 'react-native';
 import {SearchBar,Header} from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import db from '../config'
-
+import {
+  SafeAreaView,
+  SafeAreaProvider
+} from 'react-native-safe-area-context';
 export default class ReadScreen extends React.Component {
   constructor(){
     super();
@@ -20,11 +23,10 @@ export default class ReadScreen extends React.Component {
   componentDidMount(){
     this.fetchStories()
   }
-
   updateSearch = search => {
     this.setState({ search: search });
   };
-  showStories=()=>{
+  showStories=()=>{ 
     <Modal 
     animationType="fade"
     transparent={true}
@@ -46,28 +48,27 @@ export default class ReadScreen extends React.Component {
           alignContent:"center",alignSelf:"center",fontSize:15
           }}
           onPress={()=>this.setState({"isModalVisible":false})}
-          >Back</Text>
+          >Back</Text>{console.log("success")}
       </TouchableOpacity>
     </Modal>
   }
-
-  fetchStories=()=>{
+fetchStories=()=>{
     try {
       var stories= [];
      db.collection("Stories").get()
       .then((snapshot)=> {
-          snapshot.forEach((doc)=> {           
-              stories.push(doc.data())
+          snapshot.forEach((doc)=> {
+   stories.push(doc.data())
           })
-          this.setState({stories: stories})
+          console.log(stories)
         })
+        
+        this.setState({stories: stories})
     }
     catch (error) {
       console.log(error);
     }
   };
-
-
   search(text) {
     const newData = this.state.stories.filter((story)=> {
 
@@ -81,73 +82,70 @@ export default class ReadScreen extends React.Component {
       search: text,
     });
   }
-
-    render(){
+render(){
       return(
         <View>
-           <Header
-              backgroundColor={'#DF3A01'}
-              centerComponent={{
-                text: 'Read Stories',
-                style: {
-                  color: '#FFFFFF',
-                  fontSize: 30,
-                  fontWeight: 'bold',
-                },
-              }}
+        <SafeAreaProvider>
+<Header
+   backgroundColor={'#DF3A01'}
+   centerComponent={{
+text: 'Read Stories',
+style: {
+color: '#FFFFFF',
+fontSize: 30,
+fontWeight: 'bold',
+},
+   }}
           />
           <View styles ={{height:20,width:'100%'}}>
-              <SearchBar
-                  placeholder="Search"
-                  onChangeText={text => this.search(text)}
-                  onClear={text => this.search('')}
-                  value={this.state.search}
-            />
+   <SearchBar
+placeholder="Search"
+onChangeText={text => this.search(text)}
+onClear={text => this.search('')}
+value={this.state.search}
+ />
           </View>
           
-          <ScrollView>
-            {this.state.search==="" ? 
-            this.state.stories.map((story)=>{
-              return (
-                <View style={styles.storyContainer}>
-                  <Text style={{fontSize: 20,color:"blue"}}>  TITLE:  {story.Title}</Text>
-                  <Text style={{fontSize: 20,color:"blue"}}>  AUTHOR :  {story.AuthorName}</Text>
-                  <TouchableOpacity style={styles.readButton}
-                  onPress={
-                    this.setState({
-                      title:story.Title,
-                      author:story.AuthorName,
-                      story:story.Story
-                    })
-                  }> 
-                    <Text style={{fontSize: 20,color:"red"}}>Read</Text>
-                  </TouchableOpacity>
-                </View>
-              )
-            }):
-            this.state.dataSource.map((story)=>{
-              return (
-                <View style={styles.storyContainer}>
-                  <Text style={{fontSize: 20,color:"blue"}}>  TITLE:  {story.Title}</Text>
-                  <Text style={{fontSize: 20,color:"blue"}}>  AUTHOR :  {story.AuthorName}</Text>
-                  <TouchableOpacity style={styles.readButton}
-                  onPress={
-                    this.setState({
-                      title:story.Title,
-                      author:story.AuthorName,
-                      story:story.Story
-                    })
-                  }> 
-                    <Text style={{fontSize: 20,color:"red"}}>Read</Text>
-                  </TouchableOpacity>
-
-                </View>
-              )
-            })}
-            </ScrollView> 
-          
-          
-          
+ {this.state.search==="" ? 
+ this.state.stories.map((story,index)=>{
+   return (
+<View style={styles.storyContainer} key={index}>
+<Text style={{fontSize: 20,color:"blue"}}>  TITLE:  {story.Title}</Text>
+<Text style={{fontSize: 20,color:"blue"}}>  AUTHOR :  {story.AuthorName}</Text>
+<TouchableOpacity style={styles.readButton}
+onPress={()=>{
+  this.setState({
+    title:story.Title,
+    author:story.AuthorName,
+    story:story.Story,
+    isModalVisible:true
+  })}
+ }> 
+ <Text style={{fontSize: 20,color:"red"}}>Read</Text>
+</TouchableOpacity>
+</View>
+   )
+}):
+ this.state.dataSource.map((story,index)=>{
+   return (
+<View style={styles.storyContainer} key={index}>
+<Text style={{fontSize: 20,color:"blue"}} >  TITLE:  {story.Title} </Text>
+<Text style={{fontSize: 20,color:"blue"}}>   AUTHOR :  {story.AuthorName}</Text>
+<TouchableOpacity style={styles.readButton} 
+onPress={()=>{
+ this.setState({
+   title:story.Title,
+   author:story.AuthorName,
+   story:story.Story,
+   isModalVisible:true
+ })}
+}> 
+ <Text style={{fontSize: 20,color:"red"}} >Read</Text>
+</TouchableOpacity>
+</View>
+   )
+ })}          
+ </SafeAreaProvider>
         </View>  
       );      
     }
@@ -163,7 +161,6 @@ const styles = StyleSheet.create({
     borderColor: 'green',
     justifyContent:'center',
     alignSelf: 'center',
-    color:"white"
   },
   readButton:{
     backgroundColor:'green',
